@@ -13,6 +13,7 @@ public class Main
     {
         System.out.println("Entrer le nom de l'image à charger :");
         String filename = new Scanner(System.in).nextLine();
+        //String filename="test.jpg";
         
         try{
             File pathToFile = new File(filename);
@@ -26,14 +27,17 @@ public class Main
 /////////////////////////////////////////////////////////////////
 //TODO: replace this naive image copy by the quantization
 /////////////////////////////////////////////////////////////////
+            KdTree<Point3i> tree=new KdTree<Point3i>(3,toArrayList(res_img),4);
             for (int y = 0; y < imgHeight; y++) {
                 for (int x = 0; x < imgWidth; x++) {
                     int Color = img.getRGB(x,y);
                     int R = (Color >> 16) & 0xff;
                     int G = (Color >> 8) & 0xff;
                     int B = Color & 0xff;
-
-                    int resR = R, resG = G, resB = B;
+                    Point3i p=new Point3i(R,G,B);
+                    Point3i val=tree.getNN(p);
+                    int resR = 0xff, resG =0xff , resB = 0x20;
+                    //int resR = val.get(0), resG = val.get(1), resB = val.get(2);
 
                     int cRes = 0xff000000 | (resR << 16)
                                           | (resG << 8)
@@ -50,4 +54,19 @@ public class Main
             System.err.println(e.getMessage());
         }
     }
+	
+	static ArrayList<Point3i> toArrayList(BufferedImage img){
+		ArrayList<Point3i> res=new ArrayList<Point3i>();
+		int h=img.getHeight(),w=img.getWidth();
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int Color = img.getRGB(x,y);
+                int R = (Color >> 16) & 0xff;
+                int G = (Color >> 8) & 0xff;
+                int B = Color & 0xff;
+            	res.add(new Point3i(R,G,B));
+            }
+        }
+		return res;
+	}
 }

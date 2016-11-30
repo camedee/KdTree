@@ -63,12 +63,27 @@ public class KdTree<Point extends PointI>
 		this.dim_ = dim;
 		this.n_points_ = points.size();
 		
-		//TODO: replace by a balanced initialization
-		this.n_points_=0;
-		for(Point p : points) {
-			insert(p);
-		}
+		ArrayList<Point> p=tri(points,0);
+		Point e=p.get((p.size()+1)/2);
+		this.root_=new KdNode(e,0);
+		this.next((ArrayList<Point>)p.subList(0,(p.size()+1)/2),1%this.dim_,max_depth-1);
+		this.next((ArrayList<Point>)p.subList((p.size()+1)/2+1,p.size()),1%this.dim_,max_depth-1);
+		
+		
+		
 	
+	}
+	
+	void next(ArrayList<Point> points, int d, int max_depth){
+		if (max_depth>0){
+			ArrayList<Point> p=tri(points,d);
+			Point e=p.get((p.size()+1)/2);
+			this.insert(e);
+			this.next((ArrayList<Point>) p.subList(0,(p.size()+1)/2), (d+1)%this.dim_, max_depth-1);
+			this.next((ArrayList<Point>)p.subList((p.size()+1)/2+1,p.size()),(d+1)%this.dim_,max_depth-1);
+		}else{
+			this.insert(bary(points));
+		}
 	}
 	  
 	/////////////////
@@ -112,6 +127,27 @@ public class KdTree<Point extends PointI>
 	///////////////////////
 	/// Query Functions ///
 	///////////////////////
+	Point bary(ArrayList<Point> points){
+		Point p=points.get(0);
+		for (int i=1; i<points.size(); i++){
+			p.add(points.get(i));
+		}
+		p.div(points.size());
+		return p;
+		
+	}
+	
+	ArrayList<Point> tri(ArrayList<Point> points, int d){
+		ArrayList<Point> p=new ArrayList<Point>();
+		for (Point i:points){
+			int j=0;
+			while((i.get(d)>p.get(j).get(d)) & (j<p.size())){
+				j+=1;
+			}
+			p.add(j,i);
+		}
+		return p;
+	}
 
 	/** Return the node that would be the parent of p if it has to be inserted in the tree
 	 */
